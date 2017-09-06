@@ -9,12 +9,12 @@ import java.util.List;
  */
 
 public class Story {
-    private JsonArray images;
+    private List<String> images;
     private int type;
     private int id;
     private String ga_prefix;
 
-    public Story(JsonArray images, int type, int id, String ga_prefix, String title) {
+    public Story(List<String> images, int type, int id, String ga_prefix, String title) {
         this.images = images;
         this.type = type;
         this.id = id;
@@ -22,11 +22,11 @@ public class Story {
         this.title = title;
     }
 
-    public JsonArray getImages() {
+    public List<String> getImages() {
         return images;
     }
 
-    public void setImages(JsonArray images) {
+    public void setImages(List<String> images) {
         this.images = images;
     }
 

@@ -17,17 +17,17 @@ public class BasicBean {
      private String date;
 
     @SerializedName("stories")
-    private JsonArray stories;
+    private List<Story> stories;
 
     @SerializedName("top_stories")
-    private JsonArray topStory;
+    private List<TopStory> topStory;
 
     public Gson gson=new Gson();
 
     public BasicBean() {
     }
 
-    public BasicBean(String date, JsonArray stories, JsonArray topStory) {
+    public BasicBean(String date, List<Story> stories, List<TopStory> topStory) {
         this.date = date;
         this.stories = stories;
         this.topStory = topStory;
@@ -51,21 +51,19 @@ public class BasicBean {
         this.date = date;
     }
 
-    public JsonArray getStories() {
+    public List<Story> getStories() {
         return stories;
     }
 
-    public void setStories(JsonArray stories) {
+    public void setStories(List<Story> stories) {
         this.stories = stories;
     }
 
-    public JsonArray getTopStory() {
+    public List<TopStory> getTopStory() {
         return topStory;
     }
 
-    public void setTopStory(JsonArray topStory) {
+    public void setTopStory(List<TopStory> topStory) {
         this.topStory = topStory;
     }
-
-
 }

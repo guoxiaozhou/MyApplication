@@ -3,13 +3,8 @@ package example.xz.com.myapplication;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.ContextMenu;
-import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.PopupWindow;
 import android.widget.TextView;
@@ -18,20 +13,20 @@ import android.widget.Toast;
 import com.yanzhenjie.nohttp.rest.Request;
 import com.yanzhenjie.nohttp.rest.Response;
 
-import java.util.ArrayList;
+import org.litepal.crud.DataSupport;
+
 import java.util.List;
 
 import example.xz.com.myapplication.Creator.ViewModelCreator;
 import example.xz.com.myapplication.Data.BasicBean;
-import example.xz.com.myapplication.Data.ExtraNews;
 import example.xz.com.myapplication.Data.Story;
+import example.xz.com.myapplication.Data.StoryModel;
+import example.xz.com.myapplication.Data.StoryViewModel;
 import example.xz.com.myapplication.Data.TopStory;
 import example.xz.com.myapplication.Data.TopStoryViewModel;
 import example.xz.com.myapplication.NoHttp.BasicRequest;
 import example.xz.com.myapplication.NoHttp.CallServer;
-import example.xz.com.myapplication.NoHttp.EntityRequest;
 import example.xz.com.myapplication.NoHttp.ResponseCallback;
-import example.xz.com.myapplication.Utils.NetworkUtil;
 import example.xz.com.myapplication.Utils.ToastUtils;
 
 public class MainActivity extends AppCompatActivity implements ResponseCallback<BasicBean>, View.OnClickListener {
@@ -51,7 +46,8 @@ public class MainActivity extends AppCompatActivity implements ResponseCallback<
     private TextView tv_hello;
     private PopupWindow popupWindow;
     private ViewModelCreator viewModelCreator;
-    private List<TopStoryViewModel> list;
+    private List<TopStoryViewModel> topStories;
+    private List<StoryViewModel> stories;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,35 +61,36 @@ public class MainActivity extends AppCompatActivity implements ResponseCallback<
 
 
 
-//        View view= LayoutInflater.from(MainActivity.this).inflate(R.layout.dialog,null);
-//        Dialog dialog=new AlertDialog.Builder(MainActivity.this).setView(view).show();
-//        dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
 
-        if (NetworkUtil.isNetworkConnected(MyApplication.getMyApplication()) ||
-                NetworkUtil.isWifiConnected(this) ||
-                NetworkUtil.isMobileConnected(this)) {
-            Log.i("Network状态：", NetworkUtil.isNetworkConnected(MyApplication.getMyApplication()) + "");
-            Log.i("Wifi状态：", NetworkUtil.isWifiConnected(MyApplication.getMyApplication()) + "");
-            Log.i("Mobile状态：", NetworkUtil.isMobileConnected(MyApplication.getMyApplication()) + "");
-
+//        if (NetworkUtil.isNetworkConnected(MyApplication.getMyApplication()) ||
+//                NetworkUtil.isWifiConnected(this) ||
+//                NetworkUtil.isMobileConnected(this)) {
+//            Log.i("Network状态：", NetworkUtil.isNetworkConnected(MyApplication.getMyApplication()) + "");
+//            Log.i("Wifi状态：", NetworkUtil.isWifiConnected(MyApplication.getMyApplication()) + "");
+//            Log.i("Mobile状态：", NetworkUtil.isMobileConnected(MyApplication.getMyApplication()) + "");
+//
             Request request = new BasicRequest(url);
             CallServer.getInstance().request(0, request, this);
-        }else {
+//        }
+//        else {
+//
+//            list = viewModelCreator.getTopstoryModels();
 
-            list = viewModelCreator.getTopstoryModels();
-            for (int i = 0; i < list.size(); i++) {
-                Log.i("topstory", "id:" + list.get(i).getId());
-                Log.i("topstory", "title:" + list.get(i).getTitle());
-                Log.i("topstory", "type:" + list.get(i).getType());
-                Log.i("topstory", "ga_prefix:" + list.get(i).getGa_prefix());
-                Log.i("topstory", "imageurl:" + list.get(i).getImage());
-            }
-        }
+//        }
 
 
 
     }
 
+//    @Override
+//    protected void onStart() {
+//        super.onStart();
+//        topStories=viewModelCreator.getTopstoryModels();
+//        stories=viewModelCreator.getStoryModel();
+//        if(topStories!=null&&stories!=null) {
+//            tv_hello.setText(topStories.get(0).getTitle() + "  " + stories.get(0).getImages());
+//        }
+//    }
 
     @Override
     public void onSucceed(int what, Response<BasicBean> response) {
@@ -101,11 +98,30 @@ public class MainActivity extends AppCompatActivity implements ResponseCallback<
         if (basicBean != null) {
             if (what == 0) {
                 Toast.makeText(MainActivity.this, basicBean.getDate(), Toast.LENGTH_LONG).show();
-                Log.i("数据", basicBean.getDate() + "," + basicBean.getStories().toString() + "," + basicBean.getTopStory().toString());
-             //   List<Story> storyList = basicBean.setStoriesList(basicBean.getStories());
-                List<TopStory> topStoriesList = basicBean.setTopStoriesList(basicBean.getTopStory());
-                List<TopStoryViewModel> topStoryViewModels=viewModelCreator.setTopstoryModels(topStoriesList);
-                list=viewModelCreator.getTopstoryModels();
+                //网络获取的列表
+                List<TopStory> topStorylist = basicBean.getTopStory();
+                List<Story> storyList = basicBean.getStories();
+                //设置给本地数据库
+                List<TopStoryViewModel> topStoryViewModelList = viewModelCreator.setTopstoryModels(topStorylist);
+                List<StoryViewModel> storyViewModelList = viewModelCreator.setStoryModels(storyList);
+                if (topStoryViewModelList != null) {
+                    topStories = topStoryViewModelList;
+                }
+                if (storyViewModelList != null) {
+                    stories = storyViewModelList;
+                }
+
+
+                tv_hello.setText(topStories.get(0).getTitle()+"  "+stories.get(0).getImages());
+                for(StoryViewModel storyViewModel:storyViewModelList){
+                    Log.i("id",storyViewModel.getId()+"");
+                    Log.i("getGa_prefix",storyViewModel.getGa_prefix()+"");
+                    Log.i("Images",storyViewModel.getImages()+"");
+                    Log.i("title",storyViewModel.getTitle()+"");
+                    Log.i("type",storyViewModel.getType()+"");
+                }
+
+
 
             }
         }
@@ -113,7 +129,7 @@ public class MainActivity extends AppCompatActivity implements ResponseCallback<
 
     @Override
     public void onFailed(int what, Object tag, Exception exception, long networkMills) {
-        Log.i("错误", tag.toString() + exception.toString());
+
     }
 
     private void initView() {
@@ -122,7 +138,6 @@ public class MainActivity extends AppCompatActivity implements ResponseCallback<
         button2 = (Button) findViewById(R.id.button2);
         button2.setOnClickListener(this);
         tv_hello = (TextView) findViewById(R.id.tv_hello);
-        registerForContextMenu(tv_hello);
     }
 
     @Override
@@ -130,7 +145,6 @@ public class MainActivity extends AppCompatActivity implements ResponseCallback<
         switch (v.getId()) {
             case R.id.button1:
                 ToastUtils.showShort("短时间Toast");
-                showPopupWindow();
                 break;
             case R.id.button2:
                 ToastUtils.showLong("长时间Toast");
@@ -139,27 +153,4 @@ public class MainActivity extends AppCompatActivity implements ResponseCallback<
         }
     }
 
-    @Override
-    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
-        super.onCreateContextMenu(menu, v, menuInfo);
-        menu.add(0, Menu_1, 0, "复制文字");
-    }
-
-    @Override
-    public boolean onContextItemSelected(MenuItem item) {
-        if (item.getItemId() == 1)
-            ToastUtils.showShort("复制成功");
-        return super.onContextItemSelected(item);
-    }
-
-    public void showPopupWindow() {
-        View contentView = LayoutInflater.from(MyApplication.getMyApplication()).inflate(R.layout.popupwindow_copycard, null);
-        popupWindow = new PopupWindow(contentView);
-        popupWindow.setWidth(ViewGroup.LayoutParams.WRAP_CONTENT);
-        popupWindow.setHeight(ViewGroup.LayoutParams.WRAP_CONTENT);
-        popupWindow.setOutsideTouchable(true);
-        int[] location=new int[2];
-        tv_hello.getLocationOnScreen(location);
-        popupWindow.showAtLocation(tv_hello,Gravity.NO_GRAVITY, location[0]+tv_hello.getWidth(), location[1]);
-    }
 }

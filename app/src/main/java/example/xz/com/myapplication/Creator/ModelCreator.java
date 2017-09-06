@@ -1,8 +1,11 @@
 package example.xz.com.myapplication.Creator;
 
+import example.xz.com.myapplication.Data.Story;
+import example.xz.com.myapplication.Data.StoryModel;
 import example.xz.com.myapplication.Data.TopStory;
 import example.xz.com.myapplication.Data.TopStoryModel;
 import example.xz.com.myapplication.MyApplication;
+import example.xz.com.myapplication.db.StoryDao;
 import example.xz.com.myapplication.db.TopstoryDao;
 
 /**
@@ -26,6 +29,12 @@ public class ModelCreator {
         TopstoryDao topstoryDao=new TopstoryDao();
         topstoryDao.save(topStoryModel);
         return topStoryModel;
+    }
+    public StoryModel setStoryModel(Story story){
+        StoryModel storyModel=new StoryModel(story);
+        StoryDao storyDao=new StoryDao();
+        storyDao.save(storyModel);
+        return  storyModel;
     }
 
 }
