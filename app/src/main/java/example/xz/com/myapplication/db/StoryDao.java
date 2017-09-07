@@ -20,7 +20,7 @@ public class StoryDao extends BasicDao<StoryModel> {
 
     @Override
     public int delete(StoryModel bean) {
-        return DataSupport.deleteAll(StoryModel.class,"id=?",bean.getId()+"");
+        return DataSupport.deleteAll(StoryModel.class,"storyId=?",bean.getStoryId()+"");
     }
 
 

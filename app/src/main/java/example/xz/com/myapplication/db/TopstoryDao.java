@@ -21,7 +21,7 @@ public class TopstoryDao extends BasicDao<TopStoryModel> {
 
     @Override
     public int delete(TopStoryModel bean) {
-        return DataSupport.deleteAll(TopStoryModel.class,"id=?",bean.getId()+"");
+        return DataSupport.deleteAll(TopStoryModel.class,"topId=?",bean.getTopId()+"");
     }
 
 

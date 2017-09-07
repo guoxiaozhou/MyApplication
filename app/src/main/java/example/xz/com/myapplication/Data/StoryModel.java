@@ -21,14 +21,17 @@ public class StoryModel extends DataSupport{
     private String title;
     private String ga_prefix;
     private int type;
-    private int id;
+    private int storyId;
     private String image;
+
+    public StoryModel() {
+    }
 
     public StoryModel(Story story) {
         this.title = story.getTitle();
         this.ga_prefix = story.getGa_prefix();
         this.type = story.getType();
-        this.id = story.getId();
+        this.storyId = story.getstoryid();
         this.image = story.getImages().get(0);
     }
 
@@ -56,12 +59,12 @@ public class StoryModel extends DataSupport{
         this.type = type;
     }
 
-    public int getId() {
-        return id;
+    public int getStoryId() {
+        return storyId;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public void setStoryId(int id) {
+        this.storyId = id;
     }
 
     public String getImages() {

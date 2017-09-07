@@ -1,6 +1,7 @@
 package example.xz.com.myapplication.Data;
 
 import com.google.gson.JsonArray;
+import com.google.gson.annotations.SerializedName;
 
 import java.util.List;
 
@@ -11,13 +12,14 @@ import java.util.List;
 public class Story {
     private List<String> images;
     private int type;
-    private int id;
+    @SerializedName("id")
+    private int storyid;
     private String ga_prefix;
 
-    public Story(List<String> images, int type, int id, String ga_prefix, String title) {
+    public Story(List<String> images, int type, int storyid, String ga_prefix, String title) {
         this.images = images;
         this.type = type;
-        this.id = id;
+        this.storyid = storyid;
         this.ga_prefix = ga_prefix;
         this.title = title;
     }
@@ -38,12 +40,12 @@ public class Story {
         this.type = type;
     }
 
-    public int getId() {
-        return id;
+    public int getstoryid() {
+        return storyid;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public void setstoryid(int storyid) {
+        this.storyid = storyid;
     }
 
     public String getGa_prefix() {

@@ -20,14 +20,14 @@ public class TopStoryModel extends DataSupport{
     private String image;
     private String ga_prefix;
     private int type;
-    private int id;
+    private int topId;
 
     public TopStoryModel(TopStory topStory) {
         this.title = topStory.getTitle();
         this.image = topStory.getImage();
         this.ga_prefix = topStory.getGa_prefix();
         this.type = topStory.getType();
-        this.id = topStory.getId();
+        this.topId = topStory.getTopId();
     }
 
     public String getTitle() {
@@ -62,11 +62,11 @@ public class TopStoryModel extends DataSupport{
         this.type = type;
     }
 
-    public int getId() {
-        return id;
+    public int getTopId() {
+        return topId;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public void setTopId(int id) {
+        this.topId = id;
     }
 }

@@ -7,14 +7,14 @@ package example.xz.com.myapplication.Data;
 public class TopStoryViewModel {
     private String image;
     private int type;
-    private int id;
+    private int topId;
     private String ga_prefix;
     private String title;
 
     public TopStoryViewModel(TopStoryModel topStoryModel) {
         this.image = topStoryModel.getImage();
         this.type = topStoryModel.getType();
-        this.id = topStoryModel.getId();
+        this.topId = topStoryModel.getTopId();
         this.ga_prefix = topStoryModel.getGa_prefix();
         this.title = topStoryModel.getTitle();
     }
@@ -35,12 +35,12 @@ public class TopStoryViewModel {
         this.type = type;
     }
 
-    public int getId() {
-        return id;
+    public int getTopId() {
+        return topId;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public void setTopId(int id) {
+        this.topId = id;
     }
 
     public String getGa_prefix() {

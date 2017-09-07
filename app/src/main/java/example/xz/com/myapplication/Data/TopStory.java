@@ -1,5 +1,7 @@
 package example.xz.com.myapplication.Data;
 
+import com.google.gson.annotations.SerializedName;
+
 /**
  * Created by Administrator on 2017/8/28.
  */
@@ -18,7 +20,8 @@ public class TopStory {
     private String image;
     private String ga_prefix;
     private int type;
-    private int id;
+    @SerializedName("id")
+    private int topId;
 
     public String getTitle() {
         return title;
@@ -52,11 +55,11 @@ public class TopStory {
         this.type = type;
     }
 
-    public int getId() {
-        return id;
+    public int getTopId() {
+        return topId;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public void setTopId(int id) {
+        this.topId = id;
     }
 }

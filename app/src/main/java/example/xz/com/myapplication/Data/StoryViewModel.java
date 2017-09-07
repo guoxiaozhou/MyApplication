@@ -10,14 +10,14 @@ public class StoryViewModel {
     private String title;
     private String ga_prefix;
     private int type;
-    private int id;
+    private int storyId;
     private String images;
 
     public StoryViewModel(StoryModel storyModel) {
         this.title = storyModel.getTitle();
         this.ga_prefix = storyModel.getGa_prefix();
         this.type = storyModel.getType();
-        this.id = storyModel.getId();
+        this.storyId = storyModel.getStoryId();
         this.images = storyModel.getImages();
     }
 
@@ -46,11 +46,11 @@ public class StoryViewModel {
     }
 
     public int getId() {
-        return id;
+        return storyId;
     }
 
     public void setId(int id) {
-        this.id = id;
+        this.storyId = id;
     }
 
     public String getImages() {
