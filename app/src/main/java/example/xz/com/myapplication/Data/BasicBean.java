@@ -14,15 +14,13 @@ import java.util.List;
 
 public class BasicBean {
     @SerializedName("date")
-     private String date;
+    private String date;
 
     @SerializedName("stories")
     private List<Story> stories;
 
     @SerializedName("top_stories")
     private List<TopStory> topStory;
-
-    public Gson gson=new Gson();
 
     public BasicBean() {
     }
@@ -31,15 +29,6 @@ public class BasicBean {
         this.date = date;
         this.stories = stories;
         this.topStory = topStory;
-    }
-
-    public List<Story> setStoriesList(JsonArray jsonArray){
-        List<Story> storyList=gson.fromJson(jsonArray,new TypeToken<List<Story>>(){}.getType());
-        return storyList;
-    }
-
-    public List<TopStory> setTopStoriesList(JsonArray jsonArray){
-        return gson.fromJson(jsonArray,new TypeToken<List<TopStory>>(){}.getType());
     }
 
 

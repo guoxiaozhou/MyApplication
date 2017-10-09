@@ -14,21 +14,23 @@ import example.xz.com.myapplication.Data.BasicBean;
  * Created by Administrator on 2017/8/23.
  */
 
-public class BasicRequest extends RestRequest {
-    public BasicRequest(String url) {
+public class BasicRequest<T> extends RestRequest<T> {
+
+    //要解析的JavaBean的class
+    private Class<T> clazz;
+
+    public BasicRequest(String url,Class<T> clazz) {
+        this(url, RequestMethod.GET,clazz);
+    }
+    public BasicRequest(String url,RequestMethod requestMethod,Class<T> clazz) {
         super(url, RequestMethod.GET);
+        this.clazz=clazz;
     }
 
     @Override
-    public BasicBean parseResponse(Headers responseHeaders, byte[] responseBody) throws Exception {
+    public T parseResponse(Headers responseHeaders, byte[] responseBody) throws Exception {
         String response= StringRequest.parseResponseString(responseHeaders,responseBody);
-        try {
             Log.i("response:",response);
-            return new Gson().fromJson(response,BasicBean.class);
-        }catch (Exception e){
-            e.printStackTrace();
-        }
-        return new BasicBean();
-
+            return new Gson().fromJson(response,clazz);
     }
 }

@@ -16,6 +16,9 @@ public class Story {
     private int storyid;
     private String ga_prefix;
 
+    public Story() {
+    }
+
     public Story(List<String> images, int type, int storyid, String ga_prefix, String title) {
         this.images = images;
         this.type = type;

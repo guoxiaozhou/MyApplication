@@ -9,6 +9,7 @@ import com.yanzhenjie.nohttp.NoHttp;
 import org.litepal.LitePal;
 import org.litepal.LitePalApplication;
 
+import cn.bingoogolapple.swipebacklayout.BGASwipeBackManager;
 import example.xz.com.myapplication.Utils.DBUtil;
 
 /**
@@ -25,6 +26,8 @@ public class MyApplication extends LitePalApplication {
         Log.i("Application","MyApplication");
         NoHttp.initialize(this);
         myApplication=this;
+
+        BGASwipeBackManager.getInstance().init(this);
 
         LitePal.initialize(this);
         DBUtil.getInstance();

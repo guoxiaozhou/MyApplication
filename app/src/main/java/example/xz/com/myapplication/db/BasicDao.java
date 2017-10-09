@@ -20,4 +20,5 @@ public abstract class BasicDao<T> {
         return null;
     }
 
+
 }

@@ -1,30 +1,35 @@
 package example.xz.com.myapplication;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.Menu;
 import android.view.View;
-import android.widget.Button;
-import android.widget.PopupWindow;
-import android.widget.TextView;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import com.github.jdsjlzx.ItemDecoration.DividerDecoration;
+import com.github.jdsjlzx.interfaces.OnItemClickListener;
+import com.github.jdsjlzx.interfaces.OnLoadMoreListener;
+import com.github.jdsjlzx.interfaces.OnRefreshListener;
+import com.github.jdsjlzx.recyclerview.LRecyclerView;
+import com.github.jdsjlzx.recyclerview.LRecyclerViewAdapter;
+import com.github.jdsjlzx.recyclerview.ProgressStyle;
+import com.jaeger.library.StatusBarUtil;
 import com.yanzhenjie.nohttp.rest.Request;
 import com.yanzhenjie.nohttp.rest.Response;
 
-import org.litepal.crud.DataSupport;
-
+import java.util.ArrayList;
 import java.util.List;
 
+import example.xz.com.myapplication.Adapter.RecyclerViewAdapter;
 import example.xz.com.myapplication.Creator.ViewModelCreator;
 import example.xz.com.myapplication.Data.BasicBean;
 import example.xz.com.myapplication.Data.Story;
-import example.xz.com.myapplication.Data.StoryModel;
 import example.xz.com.myapplication.Data.StoryViewModel;
 import example.xz.com.myapplication.Data.TopStory;
-import example.xz.com.myapplication.Data.TopStoryModel;
 import example.xz.com.myapplication.Data.TopStoryViewModel;
 import example.xz.com.myapplication.NoHttp.BasicRequest;
 import example.xz.com.myapplication.NoHttp.CallServer;
@@ -32,41 +37,91 @@ import example.xz.com.myapplication.NoHttp.ResponseCallback;
 import example.xz.com.myapplication.Utils.NetworkUtil;
 import example.xz.com.myapplication.Utils.ToastUtils;
 
-public class MainActivity extends AppCompatActivity implements ResponseCallback<BasicBean>{
+public class MainActivity extends BaseActivity implements ResponseCallback<BasicBean> {
 
 
-    private TextView tv_hello;
     private ViewModelCreator viewModelCreator;
     private List<TopStoryViewModel> topStories;
     private List<StoryViewModel> stories;
+    private LRecyclerView recyler_view;
+    private RecyclerViewAdapter recyclerViewAdapter;
+    private LRecyclerViewAdapter adapter;
+    private LinearLayout ll_loading;
+    private LinearLayout ll_data_show;
+    private String todayDate;
+    private int date;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initView();
-        String url = "http://news-at.zhihu.com/api/4/news/latest";
-
 
         viewModelCreator = ViewModelCreator.getInstance(MyApplication.getMyApplication());
-//        DataSupport.deleteAll(TopStoryModel.class);
-//        ToastUtils.showLong("删除成功");
+
+        initData();
+    }
+    @Override
+    public boolean isSupportSwipeBack() {
+        return false;
+    }
+
+    private void initData() {
         if (!NetworkUtil.isNetworkConnected(MyApplication.getMyApplication())) {
             stories = viewModelCreator.getStoryModel();
             topStories = viewModelCreator.getTopstoryModels();
-            tv_hello.setText(topStories.get(0).getTitle() + "  " + stories.get(0).getImages());
+            if (stories != null)
+                setRecyclerAdapter();
+            ToastUtils.showLong("网络出小差了");
+        } else {
+            requestData();
         }
-//        if (NetworkUtil.isNetworkConnected(MyApplication.getMyApplication()) ||
-//                NetworkUtil.isWifiConnected(this) ||
-//                NetworkUtil.isMobileConnected(this)) {
-//            Log.i("Network状态：", NetworkUtil.isNetworkConnected(MyApplication.getMyApplication()) + "");
-//            Log.i("Wifi状态：", NetworkUtil.isWifiConnected(MyApplication.getMyApplication()) + "");
-//            Log.i("Mobile状态：", NetworkUtil.isMobileConnected(MyApplication.getMyApplication()) + "");
-//
-        Request request = new BasicRequest(url);
+    }
+
+
+    private void requestData() {
+        String url = "http://news-at.zhihu.com/api/4/news/latest";
+        Request request = new BasicRequest(url,BasicBean.class);
         CallServer.getInstance().request(0, request, this);
     }
 
+    private void requestBeforeData(String date) {
+        if (!NetworkUtil.isNetworkConnected(MyApplication.getMyApplication())) {
+            ToastUtils.showLong("网络出小差了");
+        } else {
+            String beforeurl = "http://news.at.zhihu.com/api/4/news/before/" + date;
+            Log.i("Date", beforeurl);
+            Request request = new BasicRequest(beforeurl,BasicBean.class);
+            int what = Integer.parseInt(date);
+            CallServer.getInstance().request(what, request, this);
+        }
+    }
+
+
+    private void setRecyclerAdapter() {
+        recyclerViewAdapter.setDataList(stories);
+        if (adapter == null) {
+            adapter = new LRecyclerViewAdapter(recyclerViewAdapter);
+            recyler_view.setAdapter(adapter);
+        } else {
+            adapter.notifyDataSetChanged();
+        }
+
+        adapter.setOnItemClickListener(new OnItemClickListener() {
+            @Override
+            public void onItemClick(View view, int position) {
+                if(stories.get(position).getType()==0){
+                    Intent i=new Intent(MainActivity.this,ItemActivity.class);
+                    i.putExtra("storyId",stories.get(position).getId());
+                    startActivity(i);
+                }
+
+            }
+        });
+
+        ll_data_show.setVisibility(View.VISIBLE);
+        ll_loading.setVisibility(View.GONE);
+    }
 
     @Override
     public void onSucceed(int what, Response<BasicBean> response) {
@@ -74,10 +129,14 @@ public class MainActivity extends AppCompatActivity implements ResponseCallback<
         if (basicBean != null) {
             if (what == 0) {
                 Toast.makeText(MainActivity.this, basicBean.getDate(), Toast.LENGTH_LONG).show();
+                todayDate = basicBean.getDate();
                 //网络获取的列表
                 List<TopStory> topStorylist = basicBean.getTopStory();
                 List<Story> storyList = basicBean.getStories();
                 //设置给本地数据库
+
+                addDateitem(storyList);
+
                 List<TopStoryViewModel> topStoryViewModelList = viewModelCreator.setTopstoryModels(topStorylist);
                 List<StoryViewModel> storyViewModelList = viewModelCreator.setStoryModels(storyList);
                 if (topStoryViewModelList != null) {
@@ -88,32 +147,111 @@ public class MainActivity extends AppCompatActivity implements ResponseCallback<
                 }
 
 
-                tv_hello.setText(topStories.get(0).getTitle() + "  " + stories.get(0).getImages());
 
-                for (StoryViewModel storyViewModel : stories) {
-                    Log.i("id", storyViewModel.getId() + "");
-                    Log.i("getGa_prefix", storyViewModel.getGa_prefix() + "");
-                    Log.i("Images", storyViewModel.getImages() + "");
-                    Log.i("title", storyViewModel.getTitle() + "");
-                    Log.i("type", storyViewModel.getType() + "");
+                if (stories != null)
+                    setRecyclerAdapter();
+
+                recyler_view.refreshComplete(0);
+                recyclerViewAdapter.notifyDataSetChanged();
+
+                recyler_view.setLoadMoreEnabled(true);
+
+
+            } else {
+                List<Story> storyList = basicBean.getStories();
+
+                todayDate = basicBean.getDate();
+
+                addDateitem(storyList);
+
+                List<StoryViewModel> storyViewModelList = viewModelCreator.setStoryModels(storyList);
+                if (storyViewModelList != null) {
+                    stories.addAll(stories.size(), storyViewModelList);
                 }
+
+
+
+                setRecyclerAdapter();
+
+                recyler_view.refreshComplete(0);
+
             }
         }
     }
 
+    private void addDateitem(List<Story> storyList) {
+        Story story = new Story();
+        story.setTitle(todayDate);
+        story.setstoryid(Integer.parseInt(todayDate));
+        story.setType(1);
+        story.setGa_prefix("");
+        List<String> stringList = new ArrayList<String>();
+        stringList.add("a");
+        story.setImages(stringList);
+        storyList.add(story);
+    }
+
     @Override
     public void onFailed(int what, Object tag, Exception exception, long networkMills) {
-          if(exception!=null){
-              if(!TextUtils.isEmpty(exception.getMessage())){
-                  ToastUtils.showShort(exception.getMessage());
-              }
-          }
+        if (exception != null) {
+            if (!TextUtils.isEmpty(exception.getMessage())) {
+                ToastUtils.showShort(exception.getMessage());
+            }
+        }
     }
 
     private void initView() {
-        tv_hello = (TextView) findViewById(R.id.tv_hello);
-    }
 
+        StatusBarUtil.setColor(this,getResources().getColor(R.color.colorPrimary),60);
+
+        recyler_view = (LRecyclerView) findViewById(R.id.recyler_view);
+        recyler_view.setLayoutManager(new LinearLayoutManager(this));
+        recyclerViewAdapter = new RecyclerViewAdapter(this);
+
+        DividerDecoration divider = new DividerDecoration.Builder(this)
+                .setHeight(1.0f)
+                .setPadding(1.0f)
+                .setColorResource(R.color.itemDecoration)
+                .build();
+        recyler_view.addItemDecoration(divider);
+
+        ll_loading = (LinearLayout) findViewById(R.id.ll_loading);
+        ll_data_show = (LinearLayout) findViewById(R.id.ll_data_show);
+        ll_loading.setVisibility(View.VISIBLE);
+        ll_data_show.setVisibility(View.GONE);
+
+        recyler_view.setOnRefreshListener(new OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                if (!NetworkUtil.isNetworkConnected(MyApplication.getMyApplication())) {
+                    ToastUtils.showLong("网络出小差了");
+                }else {
+                    requestData();
+                }
+
+            }
+        });
+
+
+        recyler_view.setOnLoadMoreListener(new OnLoadMoreListener() {
+            @Override
+            public void onLoadMore() {
+
+                if (null != todayDate) {
+                    date = Integer.parseInt(todayDate);
+
+                    Log.i("Date", "修改之前的日期" + date + "");
+                    requestBeforeData(date + "");
+                    date = date - 1;
+                }
+            }
+        });
+        recyler_view.setFooterViewColor(R.color.colorPrimary,R.color.colorPrimary,R.color.background);
+        recyler_view.setFooterViewHint("拼命加载中..","加载完成","网络不给力，再试一次吧");
+        recyler_view.setRefreshProgressStyle(ProgressStyle.Pacman);
+
+
+    }
 
 
 }

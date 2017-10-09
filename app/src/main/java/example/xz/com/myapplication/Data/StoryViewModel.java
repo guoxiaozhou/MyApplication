@@ -13,6 +13,9 @@ public class StoryViewModel {
     private int storyId;
     private String images;
 
+    public StoryViewModel() {
+    }
+
     public StoryViewModel(StoryModel storyModel) {
         this.title = storyModel.getTitle();
         this.ga_prefix = storyModel.getGa_prefix();
