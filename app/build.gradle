@@ -1,0 +1,97 @@
+apply plugin: 'com.android.application'
+def releaseTime() {
+    return new Date().format("yyyy-MM-dd", TimeZone.getTimeZone("UTC"))
+}
+android {
+    compileSdkVersion 26
+    buildToolsVersion '26.0.2'
+    defaultConfig {
+        applicationId rootProject.ext.android["applicationId"]
+        minSdkVersion rootProject.ext.android["minSdkVersion"]
+        targetSdkVersion rootProject.ext.android["targetSdkVersion"]
+        versionCode rootProject.ext.android["versionCode"]
+        versionName rootProject.ext.android["versionName"]
+        flavorDimensions "1"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    }
+    signingConfigs{
+        release {
+//            storeFile file ('F:/appkey/Key.jks')//签名文件路径，
+            storeFile file ('F:/appkey/MemoryKey.jks')
+            //keystore的路径通常使用项目根目录的相对路径，但也可以是使用绝对路径，尽管这不推荐
+            storePassword '123456' //密码
+            keyAlias 'Key'
+            keyPassword '123456'  //密码
+        }
+    }
+    buildTypes {
+        release {
+            // 不显示Log
+            buildConfigField "boolean", "LOG_DEBUG", "false"
+
+            minifyEnabled false
+            zipAlignEnabled true
+            // 移除无用的resource文件
+            shrinkResources false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
+
+            android.applicationVariants.all { variant ->
+                variant.outputs.all {
+                    outputFileName = "${defaultConfig.versionName}_${releaseTime()}_${variant.productFlavors[0].name}.apk"
+                }
+            }
+        }
+    }
+
+    productFlavors {
+        googleplay {}
+        huawei {}
+        xiaomi {}
+        wandoujia {}
+        baidu {}
+        yingyongbao {}
+        android360 {}
+        uc {}
+        umeng {}
+        meizu{}
+        //批量配置
+        productFlavors.all { flavor ->
+            flavor.manifestPlaceholders = [UMENG_CHANNEL_VALUE: name]
+        }
+
+    }
+//    productFlavors {
+//        yingyongbao {
+//            manifestPlaceholders = [UMENG_CHANNEL_VALUE: "yingyongbao"]
+//        }
+//        wandoujia {
+//            manifestPlaceholders = [UMENG_CHANNEL_VALUE: "wandoujia"]
+//        }
+//        xiaomi {
+//            manifestPlaceholders = [UMENG_CHANNEL_VALUE: "xiaomi"]
+//        }
+//    }
+}
+
+
+dependencies {
+    compile fileTree(include: ['*.jar'], dir: 'libs')
+    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
+        exclude group: 'com.android.support', module: 'support-annotations'
+    })
+    compile rootProject.ext.dependencies["noHttp"]
+    compile rootProject.ext.dependencies["gson"]
+    compile rootProject.ext.dependencies["picasso"]
+    //    compile rootProject.ext.dependencies["litepal"]
+    //    compile rootProject.ext.dependencies["appcompat-v7"]
+    compile rootProject.ext.dependencies["constraint-layout"]
+    testCompile 'junit:junit:4.12'
+    compile rootProject.ext.dependencies["LRecyclerView"]
+    compile rootProject.ext.dependencies["statusBar"]
+    compile rootProject.ext.dependencies["swipeLayout"]
+    compile rootProject.ext.dependencies["support-v4"]
+    compile files('libs/umeng-analytics-7.4.4.jar')
+    compile files('libs/umeng-common-1.4.4.jar')
+    implementation files('libs/litepal-1.6.0.jar')
+}
